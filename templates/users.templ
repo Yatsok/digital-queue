@@ -1,0 +1,487 @@
+package templates
+
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/Yatsok/digital-queue/internal/models"
+	"github.com/Yatsok/digital-queue/internal/helper"
+)
+
+type contextKey string
+
+templ UserProfile(req *models.UserRequestGET) {
+	@NavbarBase(req.AuthStatus)
+	<div class="flex">
+		@UserSidebar()
+		<div class="bg-gray-100">
+			<div class="container mx-auto py-8">
+				<div class="grid grid-cols-4 sm:grid-cols-12 gap-6 px-4">
+					@UserSideInfo(&req.User)
+					@UserInfo(&req.User)
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ UserSideInfo(user *models.User) {
+	<div class="col-span-4 sm:col-span-3">
+		<div class="bg-white shadow rounded-lg p-6">
+			<div class="flex flex-col items-center">
+				<div class="avatar">
+					<div class="bg-neutral text-neutral-content rounded-full w-32 h-32 mb-4 shrink-0">
+						<img src={ user.ImagePath } />
+					</div>
+				</div>
+				<h1 class="text-xl font-bold">{ fmt.Sprintf("%s %s", user.FirstName, user.LastName) }</h1>
+				<div class="mt-6 flex flex-wrap gap-4 justify-center">
+					<a href="/user/settings" class="btn btn-primary">Edit</a>
+					@DeleteConfirmationModal("user", user.ID.String())
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ UserInfo(user *models.User) {
+	<div class="col-span-full sm:col-span-9">
+		<div class="bg-white shadow rounded-lg p-6 max-w-screen">
+			<h2 class="text-xl font-bold mb-4">User Profile</h2>
+			<p class="my-1 max-w-2xl text-gray-700">
+				This is some information about the user.
+			</p>
+			<p class="text-sm h-0 invisible">
+				Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed finibus est
+				vitae tortor ullamcorper, ut vestibulum velit convallis. Aenean posuere risus non velit egestas
+				suscipit. Nunc finibus vel ante id euismod. Vestibulum ante ipsum primis in faucibus orci luctus
+				et ultrices posuere cubilia Curae; Aliquam erat volutpat. Nulla vulputate pharetra tellus, in
+				luctus risus rhoncus id.
+			</p>
+			<div class="border-t border-gray-200 px-4 py-5 sm:p-0">
+				<dl class="sm:divide-y sm:divide-gray-200">
+					<div class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6">
+						<dt class="text-sm font-medium text-gray-500">
+							First name
+						</dt>
+						<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-1">
+							{ user.FirstName }
+						</dd>
+					</div>
+					<div class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6">
+						<dt class="text-sm font-medium text-gray-500">
+							Last name
+						</dt>
+						<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-1">
+							{ user.LastName }
+						</dd>
+					</div>
+					<div class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6">
+						<dt class="text-sm font-medium text-gray-500">
+							Email address
+						</dt>
+						<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-1">
+							{ user.Email }
+						</dd>
+					</div>
+					<div class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6">
+						<dt class="text-sm font-medium text-gray-500">
+							Password
+						</dt>
+						<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-1">
+							&#9679;&#9679;&#9679;&#9679;&#9679;
+						</dd>
+					</div>
+					<div class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6">
+						<dt class="text-sm font-medium text-gray-500">
+							Country
+						</dt>
+						<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-1">
+							{ user.Country }
+						</dd>
+					</div>
+					<div class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6">
+						<dt class="text-sm font-medium text-gray-500">
+							Timezone
+						</dt>
+						<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-1">
+							{ user.Timezone }
+						</dd>
+					</div>
+				</dl>
+			</div>
+		</div>
+	</div>
+}
+
+templ UserSidebar() {
+	<div class="flex flex-col bg-gray-800 text-white min-h-screen min-w-[8rem] w-[8rem]">
+		<div class="p-4"></div>
+		<div class="flex-grow">
+			<ul class="flex flex-col space-y-2 p-4">
+				<li><a href="/user" class="block p-2">Profile</a></li>
+				<li><a href="/user/events" class="block p-2">My Events</a></li>
+				<li><a href="/user/slots" class="block p-2">My Slots</a></li>
+				<li><a href="/user/settings" class="block p-2">Settings</a></li>
+			</ul>
+		</div>
+	</div>
+}
+
+templ UserEvents(req *models.UserRequestGET) {
+	@NavbarBase(req.AuthStatus)
+	<div class="flex">
+		@UserSidebar()
+		<div class="container mt-5 m-1 min-h-screen max-w-full overflow-hidden">
+			<h3 class="text-primary text-center">Your Hosted Events</h3>
+			<hr class="mt-3 border-b-2 border-primary"/>
+			if len(req.Events) > 0 {
+				<div class="list-group shadow">
+					for _, event := range req.Events {
+						@EventListCard(event, req.TimeSlotsMap[event.ID.String()])
+					}
+				</div>
+			} else {
+				<div class="alert alert-info my-2" role="alert">
+					No events in the near future...!
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ UserSlots(req *models.UserRequestGET) {
+	@NavbarBase(req.AuthStatus)
+	<div class="flex">
+		@UserSidebar()
+		<div class="container mt-5 m-1 min-h-screen max-w-full overflow-hidden">
+			<h3 class="text-primary text-center">Your Booked Events</h3>
+			<hr class="mt-3 border-b-2 border-primary"/>
+			if len(req.TimeSlots) > 0 {
+				<div class="list-group shadow">
+					for _, timeSlot := range req.TimeSlots {
+						@UserTimeSlots(timeSlot, req.User.Timezone)
+					}
+				</div>
+			} else {
+				<div class="alert alert-info my-2" role="alert">
+					No events in the near future...!
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ UserTimeSlots(timeSlot models.TimeSlot, timezone string) {
+	<div class="max-w-[95%] mx-auto bg-white rounded-xl shadow-md overflow-hidden md: m-5">
+		<div class="p-8 flex items-center">
+			<div class="pr-4 bg-blue-500 p-6 rounded-lg text-center">
+				<p class="text-4xl font-bold text-white">{ helper.TimeInLocation(timeSlot.StartTime.String(), timezone).Format("02") }</p>
+				<p class="text-sm text-white">{ helper.TimeInLocation(timeSlot.StartTime.String(), timezone).Format("January, 2006") }</p>
+			</div>
+			<div class="ml-4">
+				<div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">{ timeSlot.EventName }</div>
+				<p class="mt-2 text-gray-500">{ helper.TimeInLocation(timeSlot.StartTime.String(), timezone).Format("15:04") } - { helper.TimeInLocation(timeSlot.EndTime.String(), timezone).Format("15:04") }</p>
+				<button
+ 					class="mt-5 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 
+                        hover:bg-indigo-700 focus:outline-none 
+                        focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+ 					hx-get={ fmt.Sprintf("/event/%s", timeSlot.EventID) }
+				>
+					View Appointment
+				</button>
+			</div>
+		</div>
+	</div>
+}
+
+templ UserSettings(req *models.UserRequestGET) {
+	@NavbarBase(req.AuthStatus)
+	<div class="flex">
+		@UserSidebar()
+		<div class="flex-grow">
+			<div class="mt-5 min-h-screen max-w-full overflow-hidden">
+				<div class="flex flex-col max-w-[95%] gap-2 mx-auto p-6 rounded-lg shadow-sm justify-center align-center text-xl">
+					<h2 class="text-2xl font-bold tracking-tight">Settings</h2>
+					<p class="text-muted-foreground">
+						Manage your account settings and set e-mail preferences.
+					</p>
+				</div>
+				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 px-4 mt-5">
+					@SettingsSideMenu()
+					<div class="bg-white shadow rounded-lg p-6 max-w-screen col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4" id="setting">
+						@SettingsAccount(req)
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ SettingsSideMenu() {
+	<div class="bg-white rounded-lg p-2 col-span-1">
+		<div class="bg-white shadow rounded-lg p-2 col-span-1">
+			<div class="flex flex-col items-center">
+				<nav class="flex flex-col space-y-2 lg:space-x-2 lg:space-y-0">
+					<a
+						class="hidden h-0"
+						href="#"
+					>Placeholder</a>
+					<a
+						class="inline-flex items-center rounded-md text-sm font-medium transition-colors h-9 px-4 py-2 justify-start
+							focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring 
+							disabled:pointer-events-none disabled:opacity-50 
+							hover:text-accent-foreground hover:bg-transparent hover:underline"
+						hx-get="/user/account"
+						hx-trigger="click"
+						hx-target="#setting"
+						href="/user/account"
+					>
+						Account
+					</a>
+					<a
+						class="inline-flex items-center rounded-md text-sm font-medium transition-colors h-9 px-4 py-2 justify-start
+							focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring 
+							disabled:pointer-events-none disabled:opacity-50 
+							hover:text-accent-foreground hover:bg-transparent hover:underline"
+						hx-get="/user/security"
+						hx-trigger="click"
+						hx-target="#setting"
+						href="/user/security"
+					>
+						Security
+					</a>
+					<a
+						class="inline-flex items-center rounded-md text-sm font-medium transition-colors h-9 px-4 py-2 justify-start
+							focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring 
+							disabled:pointer-events-none disabled:opacity-50 
+							hover:text-accent-foreground hover:bg-transparent hover:underline"
+						hx-get="/user/appearance"
+						hx-trigger="click"
+						hx-target="#setting"
+						href="/user/appearance"
+					>
+						Appearance
+					</a>
+					<a
+						class="inline-flex items-center rounded-md text-sm font-medium transition-colors h-9 px-4 py-2 justify-start
+							focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring 
+							disabled:pointer-events-none disabled:opacity-50 
+							hover:text-accent-foreground hover:bg-transparent hover:underline"
+						hx-get="/user/notifications"
+						hx-trigger="click"
+						hx-target="#setting"
+						href="/user/notifications"
+					>
+						Notifications
+					</a>
+				</nav>
+			</div>
+		</div>
+	</div>
+}
+
+templ SettingsAccount(req *models.UserRequestGET) {
+	<div class="bg-white shadow rounded-lg p-6 max-w-screen col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4" >
+		<div class="flex-1 lg:max-w-screen-lg">
+			<h2 class="text-lg font-bold tracking-tight">Account</h2>
+			<p class="text-sm text-muted-foreground">Update your account settings. Set your personal information and timezone.</p>
+			<form
+ 				hx-put="/user/account"
+ 				hx-trigger="submit"
+ 				hx-ext='json-enc'
+ 				class="mt-8 w-full"
+			>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+					<input name="firstName" type="text" placeholder="First name" value={ req.User.FirstName } class="border p-2 rounded w-full" />
+					<input name="lastName" type="text" placeholder="Last name" value={ req.User.LastName } class="border p-2 rounded w-full" />
+				</div>
+				<div class="mb-4">
+					<input name="email" type="email" placeholder="Email address" value={ req.User.Email } class="border p-2 rounded w-full" />
+				</div>
+				<div class="mb-4">
+					<select name="country" class="border p-2 rounded w-full">
+						if req.User.Country != "" {
+						<option selected>{ req.User.Country }</option>
+						}
+						<option>------------------------------</option>
+						@AllCountriesList()
+					</select>
+				</div>
+				<div class="mb-4">
+					<select name="timezone" class="border p-2 rounded w-full">
+						<option selected>{ req.User.Timezone }</option>
+						<option>------------------------------</option>
+						@AllTimezonesList()
+					</select>
+				</div>
+				<button
+ 					hx-trigger="submit"
+ 					hx-include="closest form"
+ 					class="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 focus:outline-none transition-colors"
+				>
+					Apply Changes
+				</button>
+			</form>
+		</div>
+	</div>
+}
+
+templ SettingsSecurity() {
+	<div class="bg-white shadow rounded-lg p-6 max-w-screen col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4" >
+		<div class="flex-1 lg:max-w-screen-lg">
+			<h2 class="text-lg font-bold tracking-tight">Security</h2>
+			<p class="text-sm text-muted-foreground">Update password for enhanced account security.</p>
+			<form
+ 				hx-put="/user/security"
+ 				hx-trigger="submit"
+ 				hx-ext='json-enc'
+ 				class="mt-8 w-full"
+			>
+				<div class="mb-4">
+					<label for="currentPassword" class="text-sm font-medium text-gray-700 block mb-2">Current Password *</label>
+					<input
+ 						type="password"
+ 						name="oldPassword"
+ 						placeholder="●●●●●"
+ 						class="border p-2 rounded w-full"
+ 						required />
+				</div>
+				<div class="mb-4">
+					<label for="newPassword" class="text-sm font-medium text-gray-700 block mb-2">New Password *</label>
+					<input
+ 						type="password"
+ 						name="newPassword"
+ 						placeholder="●●●●●"
+ 						class="border p-2 rounded w-full"
+ 						required />
+				</div>
+				<div class="mb-4">
+					<label for="confirmPassword" class="text-sm font-medium text-gray-700 block mb-2">Confirm New Password *</label>
+					<input
+ 						type="password"
+ 						name="confirmPassword"
+ 						placeholder="●●●●●"
+ 						class="border p-2 rounded w-full"
+ 						required />
+				</div>
+				<button
+ 					hx-trigger="submit"
+ 					hx-include="closest form"
+ 					class="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 focus:outline-none transition-colors"
+				>
+					Apply Changes
+				</button>
+			</form>
+		</div>
+	</div>
+}
+
+templ SettingsAppearance(req *models.UserRequestGET) {
+	<script src="/js/upload.js" />
+	<div class="bg-white shadow rounded-lg p-6 max-w-screen col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4"
+		_="init wait 1s then trigger DOMContentLoaded">
+		<div class="flex-1 lg:max-w-screen-lg">
+			<h2 class="text-lg font-bold tracking-tight">Appearance</h2>
+			<p class="text-sm text-muted-foreground">Change appearance of your account.</p>
+			<form 
+				hx-post="/upload" 
+				hx-trigger="submit"
+				class="mt-4 w-full max-w-screen-lg"
+				enctype="multipart/form-data">
+				<input type="hidden" name="entityPrefix" value="user" />
+				<input type="hidden" name="entityID" value={ req.User.ID.String() } />
+				<input type="hidden" name="type" value="user" />
+				<div class="editor mx-auto flex flex-col text-gray-800 border border-gray-300 p-4 shadow-lg w-full max-w-screen-lg">
+					<h1 class="text-center text-2xl sm:text-2xl font-semibold mb-4 text-gray-800">File Drop and Upload</h1>
+					<div 
+						class="bg-gray-100 p-8 text-center rounded-lg border-dashed border-2 border-gray-300 hover:border-blue-500 transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-md" 
+						id="dropzone">
+						<label 
+							for="fileInput" 
+							class="cursor-pointer flex flex-col items-center space-y-2">
+							<svg class="w-16 h-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+							</svg>
+							<span class="text-gray-600">Drag and drop your file here</span>
+							<span class="text-gray-500 text-sm">(or click to select)</span>
+						</label>
+						<input name="image" type="file" id="fileInput" class="hidden" />
+					</div>
+					<div class="mt-6 text-center" id="fileList"></div>
+				</div>
+				<div class="buttons flex justify-start">
+					<button
+						hx-trigger="submit"
+						class="mt-6 px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 focus:outline-none transition-colors"
+						>
+						Apply Changes
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+}
+
+templ SettingsNotifications(req *models.UserRequestGET) {
+	<div class="bg-white shadow rounded-lg p-6 max-w-screen col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4" >
+		<div class="flex-1 lg:max-w-screen-lg">
+			<h2 class="text-lg font-bold tracking-tight">Notifications</h2>
+			<p class="text-sm text-muted-foreground">Change your notifications settings.</p>
+			<form
+ 				hx-put="/user/notifications"
+ 				hx-trigger="submit"
+ 				hx-ext='json-enc'
+ 				class="mt-8 w-full"
+			>
+				<style>
+					.toggle-checkbox:checked {
+					@apply: right-0 border-green-400;
+					right: 0;
+					border-color: #68D391;
+					}
+					.toggle-checkbox:checked + .toggle-label {
+					@apply: bg-green-400;
+					background-color: #68D391;
+					}
+				</style>
+				<div class="mb-4">
+					<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+					if req.User.IsSubscribed {
+						<input 
+							type="checkbox" 
+							name="toggle" 
+							id="toggle" 
+							class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" 
+							checked />
+					} else {
+						<input 
+							type="checkbox" 
+							name="toggle" 
+							id="toggle" 
+							class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+					}
+						<label for="toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+					</div>
+						<label for="toggle" class="text-md text-gray-700">Receive notifications</label>
+					<input type="hidden" name="isSubscribed" id="toggleValue" value={ strconv.FormatBool(req.User.IsSubscribed) } />
+				</div>
+				<button
+ 					hx-trigger="submit"
+ 					hx-include="closest form"
+ 					class="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 focus:outline-none transition-colors"
+				>
+					Apply Changes
+				</button>
+			</form>
+			<script>
+				var checkbox = document.getElementById('toggle');
+				var hiddenInput = document.getElementById('toggleValue');
+
+				checkbox.addEventListener('change', function() {
+					hiddenInput.value = this.checked.toString();
+				});
+			</script>
+		</div>
+	</div>
+}
