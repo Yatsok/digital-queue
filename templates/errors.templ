@@ -1,0 +1,38 @@
+package templates
+
+templ NotFoundPage(){
+    @NavbarLogo()
+    <div class="relative flex justify-center min-h-screen bg-gray-100 dark:bg-gray-900 items-center sm:pt-0">
+        <div class="max-w-xl mx-auto sm:px-6 lg:px-8">
+            <div class="flex flex-col items-center pt-8 gap-12 sm:pt-0">
+                <div class="flex items-center">
+                    <div class="px-4 text-2xl text-gray-500 border-r border-gray-400 tracking-wider">
+                        404
+                    </div>
+                    <div class="ml-4 text-2xl text-gray-500 uppercase tracking-wider">
+                        Not Found
+                    </div>
+                </div>
+                <a href="/" class="px-6 py-3 bg-blue-500 text-white rounded-lg inline-block hover:bg-blue-600 transition duration-300 ease-in-out">Go to Home</a>
+            </div>
+        </div>
+    </div>
+}
+
+templ InternalServerErrorPage(){
+    @NavbarLogo()
+    <div class="relative flex justify-center min-h-screen bg-gray-100 dark:bg-gray-900 items-center sm:pt-0">
+        <div class="max-w-xl mx-auto sm:px-6 lg:px-8">
+            <div class="flex flex-col items-center pt-8 gap-12 sm:pt-0">
+                <div class="flex items-center">
+                    <div class="px-4 text-2xl text-gray-500 border-r border-gray-400 tracking-wider">
+                        500
+                    </div>
+                    <div class="ml-4 text-2xl text-gray-500 uppercase tracking-wider">
+                        Internal Server Error
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

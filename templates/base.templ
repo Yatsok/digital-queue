@@ -1,0 +1,31 @@
+package templates
+
+templ Head() {
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>DigiQue</title>
+
+            <script src="https://unpkg.com/htmx.org@1.9.8"></script>
+            <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+            <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+            <script src="/js/ws-init.js"></script>
+            <script src="//unpkg.com/alpinejs" defer></script>
+            <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <link href="/css/styles.css" rel="stylesheet" />
+            <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.17/dist/full.min.css" rel="stylesheet" type="text/css" />
+            <script src="https://cdn.tailwindcss.com"></script>
+            <link rel="icon" type="image/x-icon" href="/img/favicon.ico"/>
+    </head>
+}
+
+templ Base(Body templ.Component) {
+    <!DOCTYPE html>
+    <html lang="en">
+        @Head()
+    <body hx-ext="ws" ws-connect="/ws">
+    @Body     
+    </body>
+    </html>
+}
